@@ -826,3 +826,29 @@ html.dark .icon-moon {
     right: 20px;
     z-index: 200;
 }
+
+/* ===== Feature icons ===== */
+.icon-box {
+    width: 66px;
+    height: 66px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    box-shadow: 0 10px 20px -8px var(--c1);
+    transition: transform 0.45s cubic-bezier(0.68, -0.35, 0.27, 1.35);
+}
+
+.icon-box svg {
+    width: 30px;
+    height: 30px;
+}
+
+/* One color per feature */
+.icon-chat  { --c1: #6c5ce7; --c2: #a29bfe; }  /* purple */
+.icon-notes { --c1: #00b894; --c2: #55efc4; }  /* green */
+.icon-quiz  { --c1: #e17055; --c2: #fdcb6e; }  /* orange */
+.icon-idea  { --c1: #e84393; --c2: #fd79a8; }  /* pink */
