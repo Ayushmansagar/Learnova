@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learnova – AI Study Assistant</title>
     <link rel="stylesheet" href="../static/css/style.css">
+    <script src="../static/js/theme.js"></script>
 </head>
 <body>
 
     <!-- Navbar -->
     <nav class="navbar">
         <div class="logo">Learn<span>ova</span></div>
-        <div class="nav-buttons">
-            <a href="login.html" class="btn btn-outline">Login</a>
-            <a href="signup.html" class="btn btn-primary">Sign Up</a>
-        </div>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+        </ul>
     </nav>
 
-    <!-- Hero section -->
+    <!-- Hero -->
     <header class="hero">
         <h1>Study smarter with <span>Learnova</span></h1>
         <p>
@@ -30,27 +32,62 @@
         </div>
     </header>
 
+    <!-- About -->
+    <section class="about" id="about">
+        <h2 class="section-title">About Learnova</h2>
+        <p class="reveal">
+            Learnova is an AI-powered study assistant built to help students learn faster
+            and understand better. Instead of switching between different tools, students
+            can ask questions, summarize notes and test themselves with quizzes — all in one place.
+        </p>
+    </section>
+
     <!-- Features -->
-    <section class="features">
-        <div class="card">
-            <div class="icon">💬</div>
-            <h3>AI Chat</h3>
-            <p>Ask any study question and get clear, step-by-step answers.</p>
+    <section class="features-section" id="features">
+        <h2 class="section-title">Features</h2>
+        <div class="features">
+            <div class="card reveal" style="--d: 0s">
+                <div class="icon">💬</div>
+                <h3>AI Chat</h3>
+                <p>Ask any study question and get clear, step-by-step answers.</p>
+            </div>
+            <div class="card reveal" style="--d: 0.1s">
+                <div class="icon">📝</div>
+                <h3>Notes Summarizer</h3>
+                <p>Turn long notes into short summaries and key points.</p>
+            </div>
+            <div class="card reveal" style="--d: 0.2s">
+                <div class="icon">🧠</div>
+                <h3>Quiz Generator</h3>
+                <p>Create practice quizzes from any topic and test yourself.</p>
+            </div>
+            <div class="card reveal" style="--d: 0.3s">
+                <div class="icon">💡</div>
+                <h3>Concept Explainer</h3>
+                <p>Break down difficult concepts into simple explanations.</p>
+            </div>
         </div>
-        <div class="card">
-            <div class="icon">📝</div>
-            <h3>Notes Summarizer</h3>
-            <p>Turn long notes into short summaries and key points.</p>
-        </div>
-        <div class="card">
-            <div class="icon">🧠</div>
-            <h3>Quiz Generator</h3>
-            <p>Create practice quizzes from any topic and test yourself.</p>
-        </div>
-        <div class="card">
-            <div class="icon">💡</div>
-            <h3>Concept Explainer</h3>
-            <p>Break down difficult concepts into simple explanations.</p>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works" id="how-it-works">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps">
+            <div class="step reveal" style="--d: 0s">
+                <div class="step-number">1</div>
+                <h3>Create an account</h3>
+                <p>Sign up for free in less than a minute.</p>
+            </div>
+            <div class="step reveal" style="--d: 0.15s">
+                <div class="step-number">2</div>
+                <h3>Add your topic or notes</h3>
+                <p>Ask a question, paste your notes, or enter a topic.</p>
+            </div>
+            <div class="step reveal" style="--d: 0.3s">
+                <div class="step-number">3</div>
+                <h3>Learn with AI</h3>
+                <p>Get answers, summaries and quizzes instantly.</p>
+            </div>
         </div>
     </section>
 
@@ -58,5 +95,9 @@
         <p>© 2026 Learnova · Built as a CSE Minor Project</p>
     </footer>
 
+    <!-- Floating dark mode button -->
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+
+    <script src="../static/js/main.js"></script>
 </body>
 </html>
