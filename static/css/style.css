@@ -852,3 +852,166 @@ html.dark .icon-moon {
 .icon-notes { --c1: #00b894; --c2: #55efc4; }  /* green */
 .icon-quiz  { --c1: #e17055; --c2: #fdcb6e; }  /* orange */
 .icon-idea  { --c1: #e84393; --c2: #fd79a8; }  /* pink */
+
+/* ===== Login & Signup extras ===== */
+.auth-box {
+    animation: authIn 0.5s ease;
+}
+
+@keyframes authIn {
+    from { opacity: 0; transform: translateY(25px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-logo {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    margin-bottom: 18px;
+}
+
+.auth-box h2 {
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 28px;
+}
+
+.auth-box label {
+    color: var(--text);
+}
+
+/* Inputs with icons */
+.input-group {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.input-group input {
+    margin-bottom: 0;
+    padding-left: 42px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-group input:focus {
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--muted);
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.input-group:focus-within .input-icon {
+    color: var(--primary);
+}
+
+/* Show/hide password button */
+.input-group input[type="password"],
+.input-group:has(.toggle-password) input {
+    padding-right: 44px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+}
+
+.toggle-password svg {
+    width: 100%;
+    height: 100%;
+}
+
+.toggle-password .eye-closed { display: none; }
+.toggle-password.showing .eye-open { display: none; }
+.toggle-password.showing .eye-closed { display: block; }
+
+/* Error message */
+.error-msg {
+    color: #e74c3c;
+    font-size: 14px;
+    min-height: 20px;
+    margin: -4px 0 12px;
+}
+
+.error-msg.shake {
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+}
+
+/* Bottom link */
+.auth-switch {
+    text-align: center;
+    margin-top: 22px;
+    color: var(--muted);
+}
+
+.auth-switch a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* Back to home link */
+.back-home {
+    position: fixed;
+    top: 22px;
+    left: 22px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    opacity: 0.9;
+    transition: 0.2s;
+}
+
+.back-home svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s;
+}
+
+.back-home:hover {
+    opacity: 1;
+}
+
+.back-home:hover svg {
+    transform: translateX(-4px);
+}
