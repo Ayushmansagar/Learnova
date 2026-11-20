@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function showError(message, input) {
         errorMsg.textContent = message;
         errorMsg.classList.remove("shake");
-        void errorMsg.offsetWidth; // restart the shake animation
+        void errorMsg.offsetWidth;
         errorMsg.classList.add("shake");
         if (input) input.focus();
     }
@@ -25,51 +25,63 @@ document.addEventListener("DOMContentLoaded", function () {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    // Login form checks
+    // TEMPORARY: until Flask is ready, save the name and go to the dashboard
+    function goToDashboard(name) {
+        try {
+            localStorage.setItem("learnovaUser", name);
+        } catch (e) {}
+        window.location.href = "dashboard.html";
+    }
+
+    // Login
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
         loginForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // TEMPORARY: remove when Flask handles /login
             const email = document.getElementById("email");
             const password = document.getElementById("password");
 
             if (!isValidEmail(email.value.trim())) {
-                e.preventDefault();
                 return showError("Please enter a valid email address.", email);
             }
             if (!password.value) {
-                e.preventDefault();
                 return showError("Please enter your password.", password);
             }
-            errorMsg.textContent = "";
+
+            // Use the part before @ as a display name, e.g. "nida" from nida@gmail.com
+            let name = email.value.trim().split("@")[0];
+            try {
+                name = localStorage.getItem("learnovaUser") || name;
+            } catch (err) {}
+            name = name.charAt(0).toUpperCase() + name.slice(1);
+            goToDashboard(name);
         });
     }
 
-    // Signup form checks
+    // Signup
     const signupForm = document.getElementById("signupForm");
     if (signupForm) {
         signupForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // TEMPORARY: remove when Flask handles /signup
             const name = document.getElementById("name");
             const email = document.getElementById("email");
             const password = document.getElementById("password");
             const confirm = document.getElementById("confirm");
 
             if (!name.value.trim()) {
-                e.preventDefault();
                 return showError("Please enter your name.", name);
             }
             if (!isValidEmail(email.value.trim())) {
-                e.preventDefault();
                 return showError("Please enter a valid email address.", email);
             }
             if (password.value.length < 6) {
-                e.preventDefault();
                 return showError("Password must be at least 6 characters.", password);
             }
             if (password.value !== confirm.value) {
-                e.preventDefault();
                 return showError("Passwords do not match.", confirm);
             }
-            errorMsg.textContent = "";
+
+            goToDashboard(name.value.trim());
         });
     }
 });
