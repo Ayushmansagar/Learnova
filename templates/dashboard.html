@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard – Learnova</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-    <link rel="stylesheet" href="../static/css/dashboard.css">
-    <script src="../static/js/theme.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script src="/static/js/theme.js"></script>
 </head>
-<body class="dash-body">
+<body class="dash-body" data-user="{{ name }}"></body>
 
     <!-- ===== Icon library (hidden, reused below with <use>) ===== -->
     <svg style="display:none">
@@ -30,11 +30,11 @@
 
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar" id="sidebar">
-        <a href="index.html" class="logo sidebar-logo">Learn<span>ova</span></a>
+        <a href="/" class="logo sidebar-logo">Learn<span>ova</span></a>
 
         <nav class="side-nav">
             <p class="side-label">Menu</p>
-            <a href="dashboard.html" class="side-link active">
+            <a 	href="/dashboard" class="side-link active">
                 <svg class="ic"><use href="#i-grid"/></svg><span>Dashboard</span>
             </a>
             <a href="chat.html" class="side-link">
@@ -55,7 +55,7 @@
             <a href="#" class="side-link">
                 <svg class="ic"><use href="#i-settings"/></svg><span>Settings</span>
             </a>
-            <a href="index.html" class="side-link logout" id="logoutBtn">
+            <a href="/logout" class="side-link logout" id="logoutBtn"></a>
                 <svg class="ic"><use href="#i-logout"/></svg><span>Logout</span>
             </a>
         </div>
@@ -217,6 +217,6 @@
         </main>
     </div>
 
-    <script src="../static/js/dashboard.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
