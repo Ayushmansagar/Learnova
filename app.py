@@ -7,11 +7,15 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session
 from pymongo import MongoClient
 
-# ----- Setup -----
-load_dotenv()  # reads SECRET_KEY and MONGO_URI from .env
+from pymongo.errors import DuplicateKeyError
 
+# ----- Setup -----
+# Load .env from the same folder as app.py, wherever you run it from
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+...
 app = Flask(__name__)
-app.secret_key = os.getenv("9c9a76a1c8de85c2d0942161ae4ce4d16579ef2179b635035d09e6c80967f001")
+app.secret_key = os.getenv("SECRET_KEY")
+print("Secret key loaded:", bool(app.secret_key))
 
 client = MongoClient(os.getenv("mongodb://localhost:27017/"))
 db = client["learnova"]
@@ -65,12 +69,17 @@ def signup():
         # Hash the password, never store it as plain text
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
-        result = users.insert_one({
-            "name": name,
-            "email": email,
-            "password": hashed,
-            "created_at": datetime.now(timezone.utc),
-        })
+        try:
+            result = users.insert_one({
+                "name": name,
+                "email": email,
+                "password": hashed,
+                "created_at": datetime.now(timezone.utc),
+            })
+        except DuplicateKeyError:
+            return render_template("signup.html",
+                                   error="An account with this email already exists.",
+                                   name=name, email=email)
 
         # Log the new user in straight away
         session["user_id"] = str(result.inserted_id)

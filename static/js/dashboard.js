@@ -1,10 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     // ----- User name (TEMPORARY: comes from the browser until Flask is ready) -----
-    let fullName = "Student";
-    try {
-        fullName = localStorage.getItem("learnovaUser") || "Student";
-    } catch (e) {}
+    const fullName = document.body.dataset.user || "Student";
 
     const firstName = fullName.split(" ")[0];
     const initials = fullName
@@ -73,6 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ----- Logout -----
+        // ----- Logout -----
     document.getElementById("logoutBtn").addEventListener("click", function () {
         try {
             localStorage.removeItem("learnovaUser");

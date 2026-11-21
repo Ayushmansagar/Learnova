@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const errorMsg = document.getElementById("errorMsg");
 
-    function showError(message, input) {
+    function showError(e, message, input) {
+        e.preventDefault(); // stop the form only when something is wrong
         errorMsg.textContent = message;
         errorMsg.classList.remove("shake");
         void errorMsg.offsetWidth;
@@ -25,63 +26,43 @@ document.addEventListener("DOMContentLoaded", function () {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    // TEMPORARY: until Flask is ready, save the name and go to the dashboard
-    function goToDashboard(name) {
-        try {
-            localStorage.setItem("learnovaUser", name);
-        } catch (e) {}
-        window.location.href = "dashboard.html";
+    // Shake the server error too, if Flask sent one
+    if (errorMsg && errorMsg.textContent.trim()) {
+        errorMsg.classList.add("shake");
     }
 
-    // Login
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
         loginForm.addEventListener("submit", function (e) {
-            e.preventDefault(); // TEMPORARY: remove when Flask handles /login
             const email = document.getElementById("email");
             const password = document.getElementById("password");
 
-            if (!isValidEmail(email.value.trim())) {
-                return showError("Please enter a valid email address.", email);
-            }
-            if (!password.value) {
-                return showError("Please enter your password.", password);
-            }
-
-            // Use the part before @ as a display name, e.g. "nida" from nida@gmail.com
-            let name = email.value.trim().split("@")[0];
-            try {
-                name = localStorage.getItem("learnovaUser") || name;
-            } catch (err) {}
-            name = name.charAt(0).toUpperCase() + name.slice(1);
-            goToDashboard(name);
+            if (!isValidEmail(email.value.trim())) return showError(e, "Please enter a valid email address.", email);
+            if (!password.value) return showError(e, "Please enter your password.", password);
         });
     }
 
-    // Signup
     const signupForm = document.getElementById("signupForm");
     if (signupForm) {
         signupForm.addEventListener("submit", function (e) {
-            e.preventDefault(); // TEMPORARY: remove when Flask handles /signup
             const name = document.getElementById("name");
             const email = document.getElementById("email");
             const password = document.getElementById("password");
             const confirm = document.getElementById("confirm");
 
-            if (!name.value.trim()) {
-                return showError("Please enter your name.", name);
-            }
-            if (!isValidEmail(email.value.trim())) {
-                return showError("Please enter a valid email address.", email);
-            }
-            if (password.value.length < 6) {
-                return showError("Password must be at least 6 characters.", password);
-            }
-            if (password.value !== confirm.value) {
-                return showError("Passwords do not match.", confirm);
-            }
-
-            goToDashboard(name.value.trim());
+            if (!name.value.trim()) return showError(e, "Please enter your name.", name);
+            if (!isValidEmail(email.value.trim())) return showError(e, "Please enter a valid email address.", email);
+            if (password.value.length < 6) return showError(e, "Password must be at least 6 characters.", password);
+            if (password.value !== confirm.value) return showError(e, "Passwords do not match.", confirm);
         });
     }
+        // Disable the button after the first click so the form isn't sent twice
+    document.querySelectorAll("form").forEach(function (form) {
+        form.addEventListener("submit", function (e) {
+            if (e.defaultPrevented) return; // a check failed, keep the button active
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = "Please wait...";
+        });
+    });
 });
