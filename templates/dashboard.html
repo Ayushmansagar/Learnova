@@ -37,8 +37,8 @@
             <a 	href="/dashboard" class="side-link active">
                 <svg class="ic"><use href="#i-grid"/></svg><span>Dashboard</span>
             </a>
-            <a href="chat.html" class="side-link">
-                <svg class="ic"><use href="#i-chat"/></svg><span>AI Chat</span>
+            <a href="/chat" class="side-link">
+                <svg class="ic"><use href="#i-chat"/></svg><span>Chat with Nova</span>
             </a>
             <a href="summarizer.html" class="side-link">
                 <svg class="ic"><use href="#i-notes"/></svg><span>Notes Summarizer</span>
@@ -108,7 +108,7 @@
                     <p class="welcome-date" id="todayDate"></p>
                     <h1><span id="greeting">Hello</span>, <span id="userName">Student</span></h1>
                     <p>Ready to learn something new today? Pick a tool below or ask Nova anything.</p>
-                    <a href="chat.html" class="banner-btn">
+                    <a href="/chat" class="banner-btn">
                         Ask Nova a question
                         <svg class="ic"><use href="#i-arrow"/></svg>
                     </a>
@@ -121,7 +121,7 @@
                 <div class="stat-card">
                     <div class="icon-box sm icon-chat"><svg class="ic"><use href="#i-chat"/></svg></div>
                     <div>
-                        <div class="stat-value" id="statQuestions">0</div>
+                        <div class="stat-value" id="statQuestions">{{ questions_count }}</div>
                         <div class="stat-label">Questions asked</div>
                     </div>
                 </div>
@@ -151,9 +151,9 @@
             <!-- Tools -->
             <h2 class="dash-heading">Study tools</h2>
             <section class="tools">
-                <a href="chat.html" class="tool-card">
+                <a href="/chat" class="tool-card">
                     <div class="icon-box icon-chat"><svg class="ic"><use href="#i-chat"/></svg></div>
-                    <h3>AI Chat</h3>
+                    <h3>Chat with Nova</h3>
                     <p>Ask any study question and get clear, step-by-step answers.</p>
                     <span class="tool-open">Open <svg class="ic"><use href="#i-arrow"/></svg></span>
                 </a>

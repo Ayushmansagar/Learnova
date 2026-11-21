@@ -4,8 +4,11 @@ from functools import wraps
 
 import bcrypt
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from google import genai
+from google.genai import types
 from pymongo import MongoClient
+from bson import ObjectId
 
 from pymongo.errors import DuplicateKeyError
 
@@ -21,6 +24,38 @@ client = MongoClient(os.getenv("mongodb://localhost:27017/"))
 db = client["learnova"]
 users = db["users"]
 users.create_index("email", unique=True)  # no two accounts with the same email
+chats = db["chats"]
+chats.create_index([("user_id", 1), ("updated_at", -1)])  # fast "my recent chats" lookups
+
+# ----- Gemini setup -----
+gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+
+NOVA_INSTRUCTIONS = """
+You are Nova, the friendly AI study assistant inside Learnova, a study app for college students.
+- Explain things clearly and step by step, like a helpful senior student.
+- Keep answers short (under about 200 words) unless the student asks for more detail.
+- Use plain text only: no Markdown symbols like ** or #. For lists, use simple dashes.
+- If a question is not about studying, answer briefly and gently steer back to learning.
+- If you are not sure about something, say so honestly.
+"""
+
+
+def ask_gemini(messages, instructions=NOVA_INSTRUCTIONS):
+    """Send a conversation to Gemini and return the reply text."""
+    contents = [
+        types.Content(
+            role="user" if m["role"] == "user" else "model",
+            parts=[types.Part(text=m["text"])],
+        )
+        for m in messages
+    ]
+    response = gemini.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=contents,
+        config=types.GenerateContentConfig(system_instruction=instructions),
+    )
+    return response.text
 
 
 # ----- Helper: protect pages that need login -----
@@ -32,11 +67,26 @@ def login_required(view):
         return view(*args, **kwargs)
     return wrapper
 
+def api_login_required(view):
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            return jsonify(error="Please log in again."), 401
+        return view(*args, **kwargs)
+    return wrapper
+
+
+def get_user_chat(chat_id):
+    """Return the chat only if it exists AND belongs to the logged-in user."""
+    if not ObjectId.is_valid(chat_id):
+        return None
+    return chats.find_one({"_id": ObjectId(chat_id), "user_id": session["user_id"]})
+
 
 # ----- Pages -----
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", name=session.get("name"))
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -110,11 +160,22 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html", name=session["name"])
+    # Count all questions this user has asked Nova
+    pipeline = [
+        {"$match": {"user_id": session["user_id"]}},
+        {"$project": {"n": {"$size": {"$filter": {
+            "input": "$messages",
+            "cond": {"$eq": ["$$this.role", "user"]},
+        }}}}},
+        {"$group": {"_id": None, "total": {"$sum": "$n"}}},
+    ]
+    result = list(chats.aggregate(pipeline))
+    questions_count = result[0]["total"] if result else 0
+
+    return render_template("dashboard.html", name=session["name"], questions_count=questions_count)
 
 
 @app.route("/logout")
@@ -122,6 +183,126 @@ def logout():
     session.clear()
     return redirect(url_for("index"))
 
+# ----- AI API -----
+@app.route("/api/nova", methods=["POST"])
+def api_nova():
+    data = request.get_json(silent=True) or {}
+    raw = data.get("messages", [])
+
+    # Keep only valid messages, last 10, max 2000 characters each
+    messages = [
+        {"role": m["role"], "text": m["text"][:2000]}
+        for m in raw[-10:]
+        if isinstance(m, dict)
+        and m.get("role") in ("user", "bot")
+        and isinstance(m.get("text"), str)
+        and m["text"].strip()
+    ]
+
+    # Gemini expects the conversation to start with the user
+    while messages and messages[0]["role"] != "user":
+        messages.pop(0)
+
+    if not messages or messages[-1]["role"] != "user":
+        return jsonify(error="Please send a question."), 400
+
+    try:
+        reply = ask_gemini(messages)
+    except Exception as e:
+        app.logger.error("Gemini error: %s", e)
+        return jsonify(error="Nova is taking a short break. Please try again in a minute."), 503
+
+    return jsonify(reply=reply)
+
+    # ----- Chat with Nova (full page) -----
+@app.route("/chat")
+@login_required
+def chat_page():
+    return render_template("chat.html", name=session["name"])
+
+
+@app.route("/api/chats")
+@api_login_required
+def list_chats():
+    docs = (chats.find({"user_id": session["user_id"]}, {"title": 1})
+                 .sort("updated_at", -1)
+                 .limit(50))
+    return jsonify(chats=[{"id": str(d["_id"]), "title": d["title"]} for d in docs])
+
+
+@app.route("/api/chats/<chat_id>")
+@api_login_required
+def get_chat(chat_id):
+    chat = get_user_chat(chat_id)
+    if not chat:
+        return jsonify(error="Chat not found."), 404
+    return jsonify(
+        id=str(chat["_id"]),
+        title=chat["title"],
+        messages=[{"role": m["role"], "text": m["text"]} for m in chat["messages"]],
+    )
+
+
+@app.route("/api/chats/<chat_id>", methods=["DELETE"])
+@api_login_required
+def delete_chat(chat_id):
+    chat = get_user_chat(chat_id)
+    if not chat:
+        return jsonify(error="Chat not found."), 404
+    chats.delete_one({"_id": chat["_id"]})
+    return jsonify(ok=True)
+
+
+@app.route("/api/chat", methods=["POST"])
+@api_login_required
+def send_chat():
+    data = request.get_json(silent=True) or {}
+    message = (data.get("message") or "").strip()[:4000]
+    if not message:
+        return jsonify(error="Please type a question."), 400
+
+    # Continue an existing chat, or start a new one
+    chat = None
+    if data.get("chat_id"):
+        chat = get_user_chat(data["chat_id"])
+        if not chat:
+            return jsonify(error="Chat not found."), 404
+
+    # Send the last 10 messages so Nova remembers the conversation
+    history = [{"role": m["role"], "text": m["text"]} for m in (chat["messages"][-10:] if chat else [])]
+    history.append({"role": "user", "text": message})
+
+    try:
+        reply = ask_gemini(history) or "Sorry, I can't help with that one. Try asking another way?"
+    except Exception as e:
+        app.logger.error("Gemini error: %s", e)
+        return jsonify(error="Nova is taking a short break. Please try again in a minute."), 503
+
+    # Save the question and answer together (only after Gemini succeeded)
+    now = datetime.now(timezone.utc)
+    new_messages = [
+        {"role": "user", "text": message, "time": now},
+        {"role": "bot", "text": reply, "time": now},
+    ]
+
+    if chat:
+        chats.update_one(
+            {"_id": chat["_id"]},
+            {"$push": {"messages": {"$each": new_messages}}, "$set": {"updated_at": now}},
+        )
+        chat_id, title = str(chat["_id"]), chat["title"]
+    else:
+        title = message[:40] + ("…" if len(message) > 40 else "")
+        result = chats.insert_one({
+            "user_id": session["user_id"],
+            "title": title,
+            "messages": new_messages,
+            "created_at": now,
+            "updated_at": now,
+        })
+        chat_id = str(result.inserted_id)
+
+    return jsonify(chat_id=chat_id, title=title, reply=reply)
 
 if __name__ == "__main__":
     app.run(debug=True)

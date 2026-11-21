@@ -37,14 +37,23 @@
 
     <!-- Hero -->
     <header class="hero">
+        {% if name %}
+        <h1>Welcome back, <span>{{ name.split()[0] }}</span></h1>
+        {% else %}
         <h1>Study smarter with <span>Learnova</span></h1>
+        {% endif %}
         <p>
             Your AI-powered study assistant. Ask questions, summarize your notes,
             generate quizzes and understand tough concepts — all in one place.
         </p>
         <div class="hero-buttons">
+            {% if name %}
+            <a href="/dashboard" class="btn btn-primary btn-large">Go to Dashboard</a>
+            <a href="/logout" class="btn btn-outline btn-large">Log out</a>
+            {% else %}
             <a href="/signup" class="btn btn-primary btn-large">Get Started – It's Free</a>
             <a href="/login" class="btn btn-outline btn-large">I already have an account</a>
+            {% endif %}
         </div>
     </header>
 
@@ -142,7 +151,7 @@
     </footer>
 
         <!-- ===== Nova chatbot ===== -->
-    <div class="nova-greeting" id="novaGreeting">
+    <!-- <div class="nova-greeting" id="novaGreeting">
         <button class="nova-greeting-close" id="novaGreetingClose" aria-label="Close">×</button>
         Hi! I'm <strong>Nova</strong> 👋<br>Need help studying?
     </div>
@@ -171,9 +180,11 @@
             <input type="text" id="novaInput" placeholder="Ask Nova anything..." autocomplete="off">
             <button type="submit" aria-label="Send">➤</button>
         </form>
-    </div>
+    </div> -->
+
+    {% include "partials/nova.html" %}
 
     <script src="/static/js/main.js"></script>
-    <script src="/static/js/nova.js"></script>
+    <!-- <script src="/static/js/nova.js"></script> -->
 </body>
 </html>

@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!welcomed) {
             welcomed = true;
-            showTypingThen("Hi there! 👋 I'm Nova, your Learnova study buddy. Ask me anything about Learnova!");
+            showTypingThen("Hi there! 👋 I'm Nova, your study buddy. Ask me any study question — I can explain concepts, help with doubts, and more!");
         }
     }
 
@@ -102,41 +102,31 @@ document.addEventListener("DOMContentLoaded", function () {
         return typing;
     }
 
+        // ============================================================
+    // Nova's brain: asks Flask, which asks Gemini
     // ============================================================
-    // Nova's brain. For now: built-in answers about Learnova.
-    // LATER: we replace this function with a call to Flask + Gemini.
-    // ============================================================
+    const history = [];
+
     async function getNovaReply(message) {
-        const m = message.toLowerCase();
+        history.push({ role: "user", text: message });
 
-        if (/\b(hi|hello|hey|hii|salam)\b/.test(m)) {
-            return "Hello! 😊 How can I help you today?";
-        }
-        if (m.includes("what is learnova") || m.includes("about")) {
-            return "Learnova is an AI-powered study assistant. You can chat with AI, summarize your notes, generate quizzes and get simple explanations of tough concepts — all in one place.";
-        }
-        if (m.includes("feature") || m.includes("what can you do")) {
-            return "Learnova has 4 main features:\n💬 AI Chat\n📝 Notes Summarizer\n🧠 Quiz Generator\n💡 Concept Explainer";
-        }
-        if (m.includes("quiz")) {
-            return "Just enter a topic or paste your notes, and Learnova creates multiple-choice questions for you. Answer them and you'll see your score instantly! 🧠";
-        }
-        if (m.includes("summar") || m.includes("notes")) {
-            return "Paste your notes or upload a file, and Learnova turns them into a short summary with the key points. 📝";
-        }
-        if (m.includes("free") || m.includes("price") || m.includes("cost")) {
-            return "Yes! Learnova is completely free to use. 🎉";
-        }
-        if (m.includes("sign") || m.includes("account") || m.includes("login") || m.includes("register")) {
-            return "Click \"Get Started\" on the home page to create a free account. Already have one? Click \"I already have an account\" to log in.";
-        }
-        if (m.includes("who made") || m.includes("who built") || m.includes("creator")) {
-            return "Learnova was built by CSE students as their minor project. 👩‍💻";
-        }
-        if (m.includes("thank")) {
-            return "You're welcome! Happy studying! 📚";
-        }
+        try {
+            const res = await fetch("/api/nova", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: history })
+            });
+            const data = await res.json();
 
-        return "Good question! 🤔 Right now I can only answer questions about Learnova. Soon I'll be connected to AI and able to answer any study question. Try asking: \"What is Learnova?\"";
+            if (!res.ok) throw new Error(data.error || "Request failed");
+
+            history.push({ role: "bot", text: data.reply });
+            return data.reply;
+        } catch (err) {
+            history.pop(); // remove the question that failed
+            return err.message.includes("break")
+                ? err.message
+                : "Sorry, I couldn't connect right now. Please check that the server is running and try again.";
+        }
     }
 });

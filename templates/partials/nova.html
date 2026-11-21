@@ -1,0 +1,33 @@
+<!-- ===== Nova chatbot ===== -->
+<div class="nova-greeting" id="novaGreeting">
+    <button class="nova-greeting-close" id="novaGreetingClose" aria-label="Close">×</button>
+    Hi{% if name %} {{ name.split()[0] }}{% endif %}! I'm <strong>Nova</strong> 👋<br>Need help studying?
+</div>
+
+<button class="nova-launcher" id="novaLauncher" aria-label="Chat with Nova">🤖</button>
+
+<div class="nova-chat" id="novaChat">
+    <div class="nova-header">
+        <div class="nova-avatar">🤖</div>
+        <div>
+            <div class="nova-name">Nova</div>
+            <div class="nova-status"><span class="dot"></span> AI Study Buddy · Online</div>
+        </div>
+        <button class="nova-close" id="novaClose" aria-label="Close chat">×</button>
+    </div>
+
+    <div class="nova-messages" id="novaMessages"></div>
+
+    <div class="nova-suggestions" id="novaSuggestions">
+        <button>Explain recursion simply</button>
+        <button>How do quizzes work?</button>
+        <button>Give me a study tip</button>
+    </div>
+
+    <form class="nova-input" id="novaForm">
+        <input type="text" id="novaInput" placeholder="Ask Nova anything..." autocomplete="off">
+        <button type="submit" aria-label="Send">➤</button>
+    </form>
+</div>
+
+<script src="/static/js/nova.js"></script>
